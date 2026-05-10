@@ -1,0 +1,46 @@
+# ServiceConfig — rest_client_registry service
+# Auto-loaded by the unified service registry (recurses
+# config/registries/). Companion to endpoint.yaml + hierarchy.yaml.
+# The `controller:` block below mounts standard per-entity CRUD; legacy
+# routes under /admin/rest-client-registry/services keep running.
+
+service:
+  name: "rest-client-service"
+  entity_type: "ServiceDocument"
+  key_type: "str"
+
+  # Data Source Configuration
+  data_source:
+    type: "mongodb"
+    collection: "services"
+    # Natural-key lookups: service is keyed by its `name` field. The
+    # MongoDBDataSource honours this for get_by_id/update/delete.
+    key_field: "name"
+
+  # Cache Configuration
+  cache_backend: "in_memory"  # match issue_category convention; revisit
+                               # when redis availability is confirmed
+  cache_ttl: 300
+  cache_key_prefix: "rest_client_service:"
+
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+
+  max_bulk_size: 1000
+  query_timeout_seconds: 30
+  upsert_fields: ["name"]
+
+  default_limit: 100
+  max_limit: 1000
+
+  enable_event_invalidation: false
+  event_service_name: "rest_client_service_cache_events"
+
+# Auto-generated REST controller (per-entity CRUD only). Hierarchy-aware
+# routes (cascade delete, with-descendants, etc.) are mounted separately
+# from hierarchy.yaml by the HierarchicalController factory.
+controller:
+  base_path: "/api/1.0/modelswitch/admin/rest-client-registry/services"
+  response_envelope: true
+

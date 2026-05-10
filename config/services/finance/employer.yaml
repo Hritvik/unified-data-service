@@ -1,0 +1,39 @@
+# Employer entity configuration for unified data layer
+
+entity:
+  name: employer
+  model_class: "common_utils.models.finance.Employer"
+  service_class: "business.finance.EmployerBusiness"
+  collection: "employers"
+
+cache:
+  ttl: 300  # 5 minutes
+  enable: true
+
+events:
+  enable: true
+
+lookup_optimization:
+  builder_method: "build_employer_lookups"
+  rebuild_on: ["create", "update", "delete"]
+
+endpoints:
+  auto_generate: true
+  prefix: "/api/finance/employers"
+  include_custom_methods:
+    - "find_by_active"
+
+permissions:
+  read: ["finance:read", "admin"]
+  write: ["finance:write", "admin"]
+  delete: ["finance:delete", "admin"]
+
+indexes:
+  - {fields: ["name"], unique: false}
+  - {fields: ["active"], unique: false}
+
+validation:
+  required_fields: ["name"]
+  field_constraints:
+    name: {min_length: 1, max_length: 255}
+    active: {type: "boolean"}

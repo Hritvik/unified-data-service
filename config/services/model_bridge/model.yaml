@@ -1,0 +1,36 @@
+# ServiceConfig — model_bridge model
+# Auto-loaded by the unified service registry (recurses
+# config/registries/). Companion to deployment.yaml + hierarchy.yaml.
+
+service:
+  name: "model-bridge-model"
+  entity_type: "ModelDocument"
+  key_type: "str"
+
+  data_source:
+    type: "mongodb"
+    collection: "models"
+    # Natural-key lookups via model_name.
+    key_field: "model_name"
+
+  cache_backend: "in_memory"
+  cache_ttl: 300
+  cache_key_prefix: "model_bridge_model:"
+
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+
+  max_bulk_size: 1000
+  query_timeout_seconds: 30
+  upsert_fields: ["model_name"]
+
+  default_limit: 100
+  max_limit: 1000
+
+  enable_event_invalidation: false
+  event_service_name: "model_bridge_model_cache_events"
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/model-bridge-registry/models"
+  response_envelope: true

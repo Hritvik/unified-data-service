@@ -1,0 +1,50 @@
+# Example service configuration for Unified Data Service
+
+name: "example-service"
+entity_type: "ExampleEntity"
+key_type: "str"
+
+# Data Source Configuration
+data_source:
+  type: "mongodb"
+  collection: "examples"
+  database: "unified_data_service"
+  connection_string: "mongodb://uds_user:uds_password@mongodb:27017/unified_data_service"
+
+# Cache Configuration
+cache_backend: "redis"
+cache_ttl: 300  # 5 minutes
+cache_key_prefix: "example:"
+
+# Strategy Configuration
+cache_strategy: "write_through"
+enable_bulk_operations: true
+enable_cache_warming: true
+
+# Performance Configuration
+max_bulk_size: 1000
+query_timeout_seconds: 30
+
+# Pagination defaults
+default_limit: 100
+max_limit: 1000
+
+# Event Configuration
+enable_event_invalidation: true
+event_service_name: "event_service"
+
+# Business logic configuration (optional)
+# business_logic_class: "my_module.MyBusinessLogic"
+
+# Lookup optimization configuration (optional)
+lookup_optimization:
+  enabled: true
+  builder_method: "_build_lookup_structures"
+  rebuild_on: ["create", "update", "delete", "bulk_update", "bulk_delete"]
+
+# References to other services (optional)
+references:
+  - name: "related_items"
+    field: "related_ids"
+    target_service: "related-service"
+    resolver: "id"

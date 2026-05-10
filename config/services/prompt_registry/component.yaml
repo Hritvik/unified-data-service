@@ -1,0 +1,49 @@
+# ServiceConfig — prompt_registry component
+# Auto-loaded by the unified service registry (recurses
+# config/registries/). Companion to namespace.yaml, template.yaml +
+# hierarchy.yaml.
+
+service:
+  name: "prompt-component"
+  entity_type: "PromptComponentDocument"
+  key_type: "str"
+
+  data_source:
+    type: "mongodb"
+    collection: "prompt_components"
+    # Natural identity is compound (parent_id, component_type,
+    # component_name); single-field lookup not sufficient. The
+    # hierarchical layer keeps pk_field=id for components — graph FK
+    # parent_id is still natural-key-based.
+    key_field: "id"
+
+  cache_backend: "in_memory"
+  cache_ttl: 300
+  cache_key_prefix: "prompt_component:"
+
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+
+  max_bulk_size: 1000
+  query_timeout_seconds: 30
+  upsert_fields: ["parent_id", "component_type", "component_name"]
+
+  default_limit: 100
+  max_limit: 1000
+
+  enable_event_invalidation: false
+  event_service_name: "prompt_component_cache_events"
+
+  # Business class — compound natural-key lookup.
+  business_logic_class: "business.prompt_v2.PromptComponentV2Business"
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/prompt-registry/prompt-components"
+  response_envelope: true
+  custom_endpoints:
+    - method: "GET"
+      path: "/by-natural-key/{parent_id}/{component_type}/{component_name}"
+      service_method: "business.get_component_by_natural_key"
+      description: "Fetch a component by (parent_id, component_type, component_name)."
+

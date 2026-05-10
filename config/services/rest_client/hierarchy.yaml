@@ -1,0 +1,39 @@
+# HierarchyConfig — rest_client_registry tree
+#
+# service (root, keyed by `name`) -> endpoint (FK = parent_id holding
+# service.name).
+#
+# Depends on the two ServiceConfig YAMLs in the same directory; both must
+# be registered with ServiceFactory before this hierarchy can be built via
+# HierarchicalServiceFactory.create_hierarchy.
+
+hierarchy:
+  name: "rest_client"
+  subtree_cache_ttl_seconds: 60
+  subtree_cache_key_prefix: "rest_client_subtree"
+
+  root:
+    kind: "service"
+    service_ref: "rest-client-service"
+    pk_field: "name"
+    cascade: "delete"
+    children:
+      - kind: "endpoint"
+        service_ref: "rest-client-endpoint"
+        parent_field: "parent_id"
+        parent_kind: "service"
+        # Endpoint identity is compound (parent_id, name); pk_field stays
+        # at the default ("id") because nothing references endpoints. The
+        # FK above (parent_id -> service.name) is still natural-key-based.
+        pk_field: "id"
+        cascade: "delete"
+        unique_within_parent: ["name"]
+
+# Mount the hierarchical controller. Endpoints under this base_path:
+#   GET    /{kind}/{id}/with-descendants
+#   POST   /{kind}                              (recursive create)
+#   DELETE /{kind}/{id}                         (cascade delete)
+#   PUT    /{parent_kind}/{parent_id}/children/{child_kind}
+#   PATCH  /{child_kind}/{id}/parent
+controller:
+  base_path: "/api/1.0/modelswitch/admin/rest-client-registry/hierarchy"

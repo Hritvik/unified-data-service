@@ -1,0 +1,26 @@
+# Model Bridge Service Configuration
+
+service:
+  name: "model-bridge-model"
+  entity_type: "ModelDocument"
+  description: "Model bridge service for sourcing model and deployment data"
+  data_source:
+    type: "mongodb"
+    collection: "models"
+    database: "modelswitch"
+  key_field: "model_name"
+  cache_backend: "in_memory"
+  cache_ttl: 300
+  cache_key_prefix: "model_bridge_model:"
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+  query_timeout_seconds: 30
+  upsert_fields: ["model_name"]
+  default_limit: 100
+  max_limit: 1000
+  enable_event_invalidation: false
+  event_service_name: "model_bridge_model_cache_events"
+  controller:
+    base_path: "/api/1.0/modelswitch/admin/model-bridge-registry/models"
+    response_envelope: true

@@ -1,0 +1,44 @@
+# HierarchyConfig — prompt_registry tree
+#
+# namespace (root, pk = `namespace`)
+#   ├── prompt_template (FK = parent_id, pk_field = id; natural identity
+#   │                    is compound (parent_id, name); references
+#   │                    components M:N via the `components` field on the
+#   │                    template ServiceConfig — resolution scoped to
+#   │                    the same namespace)
+#   └── prompt_component (FK = parent_id, pk_field = id; natural identity
+#                         is compound (parent_id, type, name))
+#
+# template and component are siblings under namespace. The M:N
+# reference between them is configured on the template ServiceConfig
+# (template.yaml) and lives outside the ownership tree — deleting a
+# referenced component does NOT cascade-delete the template.
+
+hierarchy:
+  name: "prompt_registry"
+  subtree_cache_ttl_seconds: 60
+  subtree_cache_key_prefix: "prompt_registry_subtree"
+
+  root:
+    kind: "namespace"
+    service_ref: "prompt-namespace"
+    pk_field: "namespace"
+    cascade: "delete"
+    children:
+      - kind: "prompt_template"
+        service_ref: "prompt-template"
+        parent_field: "parent_id"
+        parent_kind: "namespace"
+        pk_field: "id"
+        cascade: "delete"
+        unique_within_parent: ["name"]
+      - kind: "prompt_component"
+        service_ref: "prompt-component"
+        parent_field: "parent_id"
+        parent_kind: "namespace"
+        pk_field: "id"
+        cascade: "delete"
+        unique_within_parent: ["component_type", "component_name"]
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/prompt-registry/hierarchy"

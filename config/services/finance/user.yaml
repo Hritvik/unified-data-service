@@ -1,0 +1,41 @@
+# User entity configuration for unified data layer
+
+entity:
+  name: user
+  model_class: "common_utils.models.finance.User"
+  service_class: "business.finance.UserBusiness"
+  collection: "users"
+
+cache:
+  ttl: 600  # 10 minutes
+  enable: true
+
+events:
+  enable: true
+
+lookup_optimization:
+  builder_method: "build_user_lookups"
+  rebuild_on: ["create", "update", "delete"]
+
+endpoints:
+  auto_generate: true
+  prefix: "/api/finance/users"
+  include_custom_methods:
+    - "find_by_username"
+    - "add_employer"
+    - "remove_employer"
+
+permissions:
+  read: ["finance:read", "admin"]
+  write: ["finance:write", "admin"]
+  delete: ["finance:delete", "admin"]
+
+indexes:
+  - {fields: ["username"], unique: true}
+  - {fields: ["employer_ids"], unique: false}
+
+validation:
+  required_fields: ["username"]
+  field_constraints:
+    username: {min_length: 3, max_length: 50, pattern: "^[a-zA-Z0-9_]+$"}
+    employer_ids: {max_items: 10}

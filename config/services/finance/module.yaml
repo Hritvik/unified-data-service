@@ -1,0 +1,39 @@
+# Finance module configuration
+
+module:
+  name: "finance"
+  version: "1.0.0"
+  description: "Finance data management with employers, users, and payslips"
+  database: "mongodb"
+  cache_backend: "redis"
+
+entities:
+  - "employer"
+  - "user" 
+  - "payslip"
+
+# Global finance module settings
+settings:
+  default_cache_ttl: 300
+  enable_events: true
+  enable_lookup_optimization: true
+  
+# Cross-entity relationships and constraints
+relationships:
+  user_employer:
+    type: "many_to_many"
+    user_entity: "user"
+    employer_entity: "employer"
+    join_field: "employer_ids"
+    
+  user_payslip:
+    type: "one_to_many"
+    user_entity: "user"
+    payslip_entity: "payslip"
+    foreign_key: "user_id"
+    
+  employer_payslip:
+    type: "one_to_many"
+    employer_entity: "employer"
+    payslip_entity: "payslip"
+    foreign_key: "employer_id"

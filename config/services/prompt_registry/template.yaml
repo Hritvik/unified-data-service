@@ -1,0 +1,65 @@
+# ServiceConfig — prompt_registry template
+# Auto-loaded by the unified service registry (recurses
+# config/registries/). Companion to namespace.yaml, component.yaml +
+# hierarchy.yaml.
+#
+# Templates carry an M:N reference to components via the `components`
+# List[str] field; the hierarchical layer resolves them at read time
+# scoped to the same namespace (`parent_id`).
+
+service:
+  name: "prompt-template"
+  entity_type: "PromptTemplateDocument"
+  key_type: "str"
+
+  data_source:
+    type: "mongodb"
+    collection: "prompt_templates"
+    # Natural identity is compound (parent_id, name); single-field lookup
+    # not sufficient. pk_field stays "id" at the hierarchy level — graph
+    # FK parent_id is still natural-key-based.
+    key_field: "id"
+
+  cache_backend: "in_memory"
+  cache_ttl: 300
+  cache_key_prefix: "prompt_template:"
+
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+
+  max_bulk_size: 1000
+  query_timeout_seconds: 30
+  upsert_fields: ["parent_id", "name"]
+
+  default_limit: 100
+  max_limit: 1000
+
+  enable_event_invalidation: false
+  event_service_name: "prompt_template_cache_events"
+
+  # Business class — exposes resolve_template (placeholder substitution)
+  # and natural-key fetch.
+  business_logic_class: "business.prompt_v2.PromptTemplateV2Business"
+
+  # M:N references resolved at read time. scope_field=parent_id ensures
+  # a template only sees components in its own namespace.
+  references:
+    - name: "components"
+      field: "components"
+      target_service: "prompt-component"
+      resolver: "type.name"
+      scope_field: "parent_id"
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/prompt-registry/prompt-templates"
+  response_envelope: true
+  custom_endpoints:
+    - method: "GET"
+      path: "/by-natural-key/{parent_id}/{name}"
+      service_method: "business.get_template_by_natural_key"
+      description: "Fetch a template by its (parent_id, name) natural key."
+    - method: "GET"
+      path: "/{parent_id}/{name}/resolve"
+      service_method: "business.resolve_template"
+      description: "Resolve {type.name} placeholders against components in the same namespace."

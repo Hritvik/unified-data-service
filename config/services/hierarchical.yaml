@@ -1,0 +1,20 @@
+# Hierarchical Service Configuration
+
+service:
+  name: "hierarchical"
+  entity_type: "HierarchicalNode"
+  description: "Hierarchical unified data service with tree-aware operations"
+  data_source:
+    type: "mongodb"
+    collection: "hierarchical_nodes"
+    database: "modelswitch"
+  key_field: "node_id"
+  cache_backend: "redis"
+  cache_ttl: 300
+  cache_key_prefix: "hierarchical:"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+  query_timeout_seconds: 30
+  max_depth: 10
+  enable_orphan_cleanup: true
+  cascade_delete: false

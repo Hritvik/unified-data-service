@@ -1,0 +1,48 @@
+# Payslip entity configuration for unified data layer
+
+entity:
+  name: payslip
+  model_class: "common_utils.models.finance.Payslip"
+  service_class: "business.finance.PayslipBusiness"
+  collection: "payslips"
+
+cache:
+  ttl: 180  # 3 minutes
+  enable: true
+
+events:
+  enable: true
+
+lookup_optimization:
+  builder_method: "build_payslip_lookups"
+  rebuild_on: ["create", "update", "delete"]
+
+endpoints:
+  auto_generate: true
+  prefix: "/api/finance/payslips"
+  include_custom_methods:
+    - "find_by_user_id"
+    - "find_by_employer_id"
+    - "find_by_user_and_employer"
+    - "find_by_month_range"
+
+permissions:
+  read: ["finance:read", "admin"]
+  write: ["finance:write", "admin"]
+  delete: ["finance:delete", "admin"]
+
+indexes:
+  - {fields: ["user_id"], unique: false}
+  - {fields: ["employer_id"], unique: false}
+  - {fields: ["month"], unique: false}
+  - {fields: ["user_id", "employer_id"], unique: false}
+  - {fields: ["user_id", "month"], unique: false}
+
+validation:
+  required_fields: ["user_id", "employer_id", "bank_name", "bank_account_no", "month", "number_of_days"]
+  field_constraints:
+    bank_name: {min_length: 1, max_length: 255}
+    bank_account_no: {min_length: 1, max_length: 50}
+    number_of_days: {min_value: 1, max_value: 31}
+    lop: {min_value: 0, max_value: 31}
+    lopr: {min_value: 0, max_value: 31}

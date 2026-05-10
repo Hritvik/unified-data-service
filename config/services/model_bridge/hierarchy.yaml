@@ -1,0 +1,30 @@
+# HierarchyConfig — model_bridge tree (2 levels)
+#
+# model (root, pk = model_name)
+#   └── deployment (pk = deployment_name, parent_id = model.model_name)
+#
+# RoutePlan stays out of this tree — it sideways-references both models
+# and deployments by name and can be added later as either a separate
+# hierarchy or an M:N reference once a real call site needs it.
+
+hierarchy:
+  name: "model_bridge"
+  subtree_cache_ttl_seconds: 60
+  subtree_cache_key_prefix: "model_bridge_subtree"
+
+  root:
+    kind: "model"
+    service_ref: "model-bridge-model"
+    pk_field: "model_name"
+    cascade: "delete"
+    children:
+      - kind: "deployment"
+        service_ref: "model-bridge-deployment"
+        parent_field: "parent_id"
+        parent_kind: "model"
+        pk_field: "deployment_name"
+        cascade: "delete"
+        unique_within_parent: ["deployment_name"]
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/model-bridge-registry/hierarchy"

@@ -1,0 +1,46 @@
+# ServiceConfig — model_bridge route plan
+# Auto-loaded by the unified service registry (recurses
+# config/registries/). RoutePlan is a *standalone* entity — it is not
+# part of the model→deployment ownership tree (so it does NOT appear in
+# hierarchy.yaml) but lives alongside the rest of the model_bridge
+# registry's per-entity surface.
+#
+# RoutePlan sideways-references models and deployments by natural name
+# from inside its nested `route_plan.levels[]` configuration. Those
+# references are deeply nested (not a flat List[str]) so the unified
+# layer does not auto-resolve them via ReferenceConfig — clients call the
+# model / deployment endpoints directly when they need to expand a
+# level's targets.
+
+service:
+  name: "model-bridge-route-plan"
+  entity_type: "RoutePlanDocument"
+  key_type: "str"
+
+  data_source:
+    type: "mongodb"
+    collection: "route_plans"
+    # Natural-key lookups via route_plan_name.
+    key_field: "route_plan_name"
+
+  cache_backend: "in_memory"
+  cache_ttl: 300
+  cache_key_prefix: "model_bridge_route_plan:"
+
+  cache_strategy: "write_through"
+  enable_bulk_operations: true
+  enable_cache_warming: true
+
+  max_bulk_size: 1000
+  query_timeout_seconds: 30
+  upsert_fields: ["route_plan_name"]
+
+  default_limit: 100
+  max_limit: 1000
+
+  enable_event_invalidation: false
+  event_service_name: "model_bridge_route_plan_cache_events"
+
+controller:
+  base_path: "/api/1.0/modelswitch/admin/model-bridge-registry/route-plans"
+  response_envelope: true
