@@ -198,7 +198,10 @@ docker-compose.override.yml
 # Docker
 .dockerignore
 docker-compose.*.yml
+!.dockerignore
 !docker-compose.yml
+!docker-compose.local.yml
+!docker-compose.registry.yml
 
 # Temporary files
 *.tmp
