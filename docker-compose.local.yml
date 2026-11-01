@@ -1,0 +1,75 @@
+services:
+  unified-data-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - UDS_APP_NAME=unified-data-service
+      - UDS_VERSION=1.0.0
+      - UDS_DEBUG=true
+      - UDS_HOST=0.0.0.0
+      - UDS_PORT=8080
+      - UDS_DATABASE__MONGODB_URI=mongodb://admin:password@mongodb:27017
+      - UDS_DATABASE__MONGODB_DATABASE=unified_data_service
+      - UDS_CACHE__REDIS_HOST=redis
+      - UDS_CACHE__REDIS_PORT=6379
+      - UDS_CACHE__REDIS_DB=0
+      - UDS_EVENT_SERVICE__ENABLED=false
+      - UDS_METRICS__ENABLED=true
+      - UDS_METRICS__PORT=9090
+      - UDS_CONFIG_DIRECTORY=/app/config/services
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - uds-local
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=unified_data_service
+    volumes:
+      - uds_mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "mongodb://admin:password@localhost:27017/admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - uds-local
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - uds_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - uds-local
+
+volumes:
+  uds_mongodb_data:
+  uds_redis_data:
+
+networks:
+  uds-local:
+    driver: bridge

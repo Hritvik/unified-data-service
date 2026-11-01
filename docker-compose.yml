@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   # Unified Data Service
   unified-data-service:
+    image: ${UDS_IMAGE:-unified-data-service:local}
     build: .
     ports:
       - "8080:8080"

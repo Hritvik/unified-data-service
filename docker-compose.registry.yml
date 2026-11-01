@@ -1,0 +1,24 @@
+services:
+  unified-data-service:
+    image: ${UDS_IMAGE:-ghcr.io/local/unified-data-service:dev}
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      - UDS_DATABASE__MONGODB_URI=${UDS_DATABASE__MONGODB_URI:-mongodb://admin:password@mongodb:27017}
+      - UDS_DATABASE__MONGODB_DATABASE=${UDS_DATABASE__MONGODB_DATABASE:-unified_data_service}
+      - UDS_CACHE__REDIS_HOST=${UDS_CACHE__REDIS_HOST:-redis}
+      - UDS_CACHE__REDIS_PORT=${UDS_CACHE__REDIS_PORT:-6379}
+      - UDS_CONFIG_DIRECTORY=${UDS_CONFIG_DIRECTORY:-/app/config/services}
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+    networks:
+      - shared-infrastructure
+
+networks:
+  shared-infrastructure:
+    external: true

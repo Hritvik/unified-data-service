@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, TypeVar
 import logging
 from typing import TYPE_CHECKING
 
+from common_utils.cache import ICacheRepository
+
 if TYPE_CHECKING:
     from abc import ABC, abstractmethod
     from typing import Any, Dict, List, Optional, Protocol
