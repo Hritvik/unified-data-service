@@ -6,10 +6,10 @@ This service supports two Docker workflows:
 2. A shared microservice stack that connects to `distracted-dev-infra`.
 
 For a portable multi-repo setup, use
-`/Users/hritvikdinkar/repositories/distracted-dev-infra` as the main entrypoint:
+`~/repositories/distracted-dev-infra` as the main entrypoint:
 
 ```bash
-cd /Users/hritvikdinkar/repositories/distracted-dev-infra
+cd ~/repositories/distracted-dev-infra
 make bootstrap
 make up
 ```
@@ -29,7 +29,7 @@ Use this for day-to-day debugging when you want Unified Data Service, MongoDB,
 and Redis started together from this repository.
 
 ```bash
-cd /Users/hritvikdinkar/repositories/unified-data-service
+cd ~/repositories/unified-data-service
 docker compose -f docker-compose.local.yml up --build
 ```
 
@@ -96,7 +96,7 @@ microservice infrastructure.
 ### Step 2: Start Infrastructure Services
 Once Docker is running, execute:
 ```bash
-cd /Users/hritvikdinkar/repositories/distracted-dev-infra
+cd ~/repositories/distracted-dev-infra
 docker compose -f docker-compose/shared-infrastructure.yml up -d
 ```
 
@@ -114,7 +114,7 @@ redis-cli ping
 
 ### Step 4: Start Unified Data Service
 ```bash
-cd /Users/hritvikdinkar/repositories/unified-data-service
+cd ~/repositories/unified-data-service
 docker compose up -d
 ```
 

@@ -214,3 +214,6 @@ docker-compose.*.yml
 *.db
 *.sqlite
 *.sqlite3
+
+# Local scratch scripts
+scratch/
